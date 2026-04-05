@@ -1,23 +1,16 @@
-function FoodCard({ product }) {
-  const { product_name, brands, nutriments, image_small_url } = product
+import { Grid } from '@mui/material'
+import FoodCard from './FoodCard'
 
+function FoodList({ products }) {
   return (
-    <div className="food-card">
-      <img
-        src={image_small_url || "https://via.placeholder.com/100"}
-        alt={product_name}
-        width="100"
-      />
-
-      <h2>{product_name || "Unknown Product"}</h2>
-      <p><strong>Brand:</strong> {brands || "N/A"}</p>
-
-      <p>Calories: {nutriments?.['energy-kcal_100g'] || "N/A"} kcal</p>
-      <p>Protein: {nutriments?.proteins_100g || "N/A"} g</p>
-      <p>Carbs: {nutriments?.carbohydrates_100g || "N/A"} g</p>
-      <p>Fat: {nutriments?.fat_100g || "N/A"} g</p>
-    </div>
+    <Grid container spacing={2}>
+      {products.map(p => (
+        <Grid item xs={12} sm={6} md={4} key={p.code}>
+          <FoodCard product={p} />
+        </Grid>
+      ))}
+    </Grid>
   )
 }
 
-export default FoodCard
+export default FoodList
