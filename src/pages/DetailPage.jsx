@@ -1,57 +1,38 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import axios from 'axios'
+import { useDispatch, useSelector } from 'react-redux'
+import { addItem, removeItem } from '../store/savedSlice'
 
-function DetailPage({ saved, dispatch }) {
+function DetailPage() {
   const { barcode } = useParams()
-  const navigate = useNavigate()
-
   const [product, setProduct] = useState(null)
-  const [loading, setLoading] = useState(true)
+
+  const dispatch = useDispatch()
+  const saved = useSelector(s => s.saved.items)
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const res = await axios.get(
-          `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`
-        )
-
-        setProduct(res.data.product)
-      } catch {
-        console.log("error")
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchProduct()
+    axios
+      .get(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`)
+      .then(res => setProduct(res.data.product))
   }, [barcode])
 
-  if (loading) return <p>Loading...</p>
-  if (!product) return <p>No product found</p>
+  if (!product) return <p>Loading...</p>
 
-  const isSaved = saved.some((p) => p.code === barcode)
-
-  const handleSave = () => {
-    if (isSaved) {
-      dispatch({ type: 'REMOVE', code: barcode })
-    } else {
-      dispatch({ type: 'ADD', product })
-    }
-  }
+  const isSaved = saved.some(p => p.code === barcode)
 
   return (
     <div>
-      <button onClick={() => navigate(-1)}>Back</button>
-
       <h2>{product.product_name}</h2>
-      <p>{product.brands}</p>
 
-      <p>Calories: {product.nutriments?.['energy-kcal_100g']}</p>
-      <p>Protein: {product.nutriments?.proteins_100g}</p>
-
-      <button onClick={handleSave}>
-        {isSaved ? 'Remove from Saved' : 'Save'}
+      <button
+        onClick={() =>
+          isSaved
+            ? dispatch(removeItem(barcode))
+            : dispatch(addItem(product))
+        }
+      >
+        {isSaved ? 'Remove' : 'Save'}
       </button>
     </div>
   )
